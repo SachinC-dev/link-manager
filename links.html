@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            overflow-y: auto;
+            background-color: #f4f4f4; /* Default light background */
+            color: #333; /* Default light text color */
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 80%;
+            max-width: 1200px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50; /* Green for light mode */
+        }
+
+        body.dark h1 {
+            color: white; /* Set the color of h1 to white in dark mode */
+        }
+
+        .link-item {
+            background-color: #e1f7d5;
+            margin: 15px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .link-item a {
+            color: #4CAF50; /* Green for light mode */
+            text-decoration: none;
+            font-weight: bold;
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+
+        .link-item button {
+            background-color: #FF6347;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px; /* Added margin to create space between buttons */
+        }
+
+        .link-item button.edit {
+            background-color: #FFD700;
+        }
+
+        .link-item button:hover {
+            opacity: 0.8;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .form-container {
+            margin-top: 20px;
+            display: none; /* Hide the form initially */
+        }
+
+        .button-add {
+            background-color: #4CAF50; /* Green for light mode */
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .button-add:hover {
+            opacity: 0.8;
+        }
+
+        .button-download {
+            background-color: #008CBA;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .button-download:hover {
+            opacity: 0.8;
+        }
+
+        .plus-button {
+            font-size: 36px;
+            color: #4CAF50; /* Green for light mode */
+            background-color: #f4f4f4;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .plus-button:hover {
+            opacity: 0.8;
+        }
+
+        /* Dark Theme Styles */
+        body.dark {
+            background-color: #121212;
+            color: #f4f4f4;
+        }
+
+        body.dark .container {
+            background-color: #333;
+            color: #f4f4f4;
+        }
+
+        body.dark .link-item {
+            background-color: #1E90FF;
+        }
+
+        body.dark .link-item a {
+            color: #ffffff; /* Blue for link text in dark mode */
+        }
+
+        body.dark .link-item button {
+            background-color: #FF6347;
+        }
+
+        body.dark .form-input {
+            background-color: #555;
+            border: 1px solid #888;
+            color: #f4f4f4;
+        }
+
+        body.dark .button-add,
+        body.dark .button-download,
+        body.dark .plus-button {
+            background-color: #1E90FF; /* Blue buttons in dark mode */
+            color: #ffffff;
+        }
+
+        body.dark .button-add:hover,
+        body.dark .button-download:hover,
+        body.dark .plus-button:hover {
+            background-color: #008CBA; /* Darker blue when hovering */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+
+            .link-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .link-item button {
+                margin-top: 5px;
+                width: 100%;
+            }
+
+            .form-input {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Link Manager</h1>
+
+        <div id="link-list">
+            <!-- Links will be listed here -->
+        </div>
+
+        <div class="form-container">
+            <input type="text" id="link-name" class="form-input" placeholder="Link Name">
+            <input type="url" id="link-url" class="form-input" placeholder="Link URL">
+            <button id="add-link" class="button-add">Add Link</button>
+        </div>
+    </div>
+
+    <!-- Plus button to open the form -->
+    <button class="plus-button" onclick="toggleForm()">+</button>
+
+    <!-- Dark theme toggle button -->
+    <button onclick="toggleDarkTheme()" class="plus-button" style="bottom: 90px; background-color: #008CBA;">🌙</button>
+
+    <script>
+        // Function to get links from localStorage
+        function getLinksFromStorage() {
+            const links = localStorage.getItem('links');
+            return links ? JSON.parse(links) : [];
+        }
+
+        // Function to save links to localStorage
+        function saveLinksToStorage(links) {
+            localStorage.setItem('links', JSON.stringify(links));
+        }
+
+        // Initialize links array from localStorage
+        let links = getLinksFromStorage();
+
+        // Function to display all links
+        function displayLinks() {
+            const linkList = document.getElementById("link-list");
+            linkList.innerHTML = "";
+
+            links.forEach((link, index) => {
+                const linkItem = document.createElement("div");
+                linkItem.classList.add("link-item");
+
+                // Link text and URL (without target="_blank")
+                const linkText = document.createElement("a");
+                linkText.href = link.url;
+                linkText.textContent = link.name;
+
+                // Edit button
+                const editButton = document.createElement("button");
+                editButton.classList.add("edit");
+                editButton.textContent = "Edit";
+                editButton.onclick = () => editLink(index);
+
+                // Delete button
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.onclick = () => deleteLink(index);
+
+                // Append the elements to the linkItem
+                linkItem.appendChild(linkText);
+                linkItem.appendChild(editButton);
+                linkItem.appendChild(deleteButton);
+
+                // Append the link item to the list
+                linkList.appendChild(linkItem);
+            });
+        }
+
+        // Function to add a new link
+        function addLink() {
+            const name = document.getElementById("link-name").value;
+            const url = document.getElementById("link-url").value;
+
+            if (name && url) {
+                links.push({ name, url });
+                saveLinksToStorage(links);
+                displayLinks();
+
+                // Clear the form inputs
+                document.getElementById("link-name").value = "";
+                document.getElementById("link-url").value = "";
+                toggleForm();  // Close the form after submission
+            } else {
+                alert("Please fill out both fields.");
+            }
+        }
+
+        // Function to edit a link
+        function editLink(index) {
+            const name = prompt("Edit link name:", links[index].name);
+            const url = prompt("Edit link URL:", links[index].url);
+
+            if (name && url) {
+                links[index] = { name, url };
+                saveLinksToStorage(links);
+                displayLinks();
+            }
+        }
+
+        // Function to delete a link
+        function deleteLink(index) {
+            if (confirm("Are you sure you want to delete this link?")) {
+                links.splice(index, 1);
+                saveLinksToStorage(links);
+                displayLinks();
+            }
+        }
+
+        // Function to toggle the form visibility
+        function toggleForm() {
+            const formContainer = document.querySelector(".form-container");
+            formContainer.style.display = formContainer.style.display === "none" ? "block" : "none";
+        }
+
+        // Function to toggle dark mode
+        function toggleDarkTheme() {
+            const body = document.body;
+            const currentTheme = body.classList.contains('dark') ? 'dark' : 'light';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            // Only save to localStorage if the theme has changed
+            if (currentTheme !== newTheme) {
+                body.classList.toggle("dark");
+                localStorage.setItem('theme', newTheme);
+            }
+        }
+
+        // Set initial theme based on localStorage
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme && savedTheme === 'dark') {
+            document.body.classList.add('dark');
+        }
+
+        // Display links on page load
+        displayLinks();
+
+        // Add link when the button is clicked
+        document.getElementById("add-link").addEventListener("click", addLink);
+    </script>
+</body>
+</html>
