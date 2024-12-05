@@ -318,7 +318,8 @@
         // Function to toggle the form visibility
         function toggleForm() {
             const formContainer = document.querySelector(".form-container");
-            formContainer.style.display = formContainer.style.display === "none" ? "block" : "none";
+            const isFormVisible = formContainer.style.display === "block";
+            formContainer.style.display = isFormVisible ? "none" : "block";
         }
 
         // Function to toggle dark mode
